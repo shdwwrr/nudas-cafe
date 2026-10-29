@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NUDAS — Cafetería Online · Café de Especialidad en Grano &amp; SipO's</title>
+  <meta name="description" content="Nudas (@nudas_co) — Café de especialidad en grano (250 g) y filtros individuales portátiles SipO's (105 g). Orígenes de Colombia, Bolivia, El Salvador, Guatemala, Honduras y Costa Rica disponibles en Lider.cl.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&amp;display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <style>
+    :root {
+      --bg-obsidian: #0c0907;
+      --bg-espresso: #130e0a;
+      --bg-umber: #1b140e;
+      --text-cream: #f4ece1;
+      --text-sand: #c7b6a2;
+      --text-muted: #8e7c68;
+      --accent-caramel: #c88434;
+      --accent-gold: #e3a354;
+      --line-subtle: rgba(244, 236, 225, 0.08);
+      --radius-max: 6px;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-obsidian);
+      color: var(--text-cream);
+      overflow-x: clip;
+    }
+
+    body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: clip;
+      background-color: var(--bg-obsidian);
+      color: var(--text-cream);
+      font-family: 'Instrument Sans', sans-serif;
+      letter-spacing: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+    }
+
+    .section-title,
+    .section-copy,
+    .section-nav,
+    .section-brand,
+    .eyebrow,
+    .btn-primary,
+    .btn-ghost {
+      font-family: 'Instrument Sans', sans-serif;
+      letter-spacing: 0;
+    }
+
+    .section-title em,
+    .serif-italic {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* Ambient Three.js Background Canvas (bridges all sections seamlessly) */
+    #webgl-atmosphere {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    /* Sticky Floating Header — Zero hard border cut */
+    .site-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 48px;
+      background: linear-gradient(180deg, rgba(12, 9, 7, 0.82) 0%, rgba(12, 9, 7, 0.32) 68%, transparent 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: padding 0.35s ease, background 0.35s ease;
+    }
+
+    .site-header.is-scrolled {
+      padding: 14px 48px;
+      background: linear-gradient(180deg, rgba(12, 9, 7, 0.94) 0%, rgba(12, 9, 7, 0.78) 82%, transparent 100%);
+    }
+
+    .section-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-cream);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: var(--radius-max);
+    }
+
+    .brand-knot-icon {
+      width: 28px;
+      height: 14px;
+      stroke: var(--accent-caramel);
+      fill: none;
+      stroke-width: 1.8;
+    }
+
+    .section-nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .section-nav a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sand);
+      text-decoration: none;
+      padding: 4px 6px;
+      border-radius: var(--radius-max);
+      transition: color 0.25s ease;
+    }
+
+    .section-nav a:hover {
+      color: var(--text-cream);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-ig-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-sand);
+      text-decoration: none;
+      padding: 7px 12px;
+      border-radius: var(--radius-max);
+      border: 1px solid rgba(244, 236, 225, 0.1);
+      transition: color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .header-ig-link:hover {
+      color: var(--text-cream);
+      border-color: rgba(244, 236, 225, 0.28);
+    }
+
+    .header-bag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-cream);
+      background: rgba(200, 132, 52, 0.15);
+      border: 1px solid rgba(200, 132, 52, 0.36);
+      border-radius: var(--radius-max);
+      text-decoration: none;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .header-bag-pill:hover {
+      background: rgba(200, 132, 52, 0.26);
+      border-color: var(--accent-caramel);
+    }
+
+    /* Keyboard Focus Accessibility */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: 3px;
+    }
+
+    /* ==========================================================================
+       01. HERO SECTION — Non-Overlapping Logo + Copy Stack & Seamless Fusion
+       ========================================================================== */
+    .hero {
+      position: relative;
+      width: 100%;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 104px 48px 34px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-edge {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background:
+        radial-gradient(85% 75% at 22% 45%, rgba(12, 9, 7, 0.66) 0%, rgba(12, 9, 7, 0.22) 56%, transparent 100%),
+        linear-gradient(180deg,
+          rgba(12, 9, 7, 0.46) 0%,
+          rgba(12, 9, 7, 0.06) 28%,
+          rgba(12, 9, 7, 0.16) 68%,
+          rgba(12, 9, 7, 0.88) 90%,
+          var(--bg-obsidian) 100%
+        );
+    }
+
+    .hero-stage {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1320px;
+      margin: auto 0;
+      display: grid;
+      grid-template-columns: minmax(300px, 560px) 1fr;
+      align-items: center;
+      padding: 14px 0 24px;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+      gap: 20px;
+    }
+
+    .hero-logo-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 2px;
+    }
+
+    .hero-logo-img {
+      width: clamp(185px, 21vw, 290px);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55));
+      user-select: none;
+    }
+
+    /* Animated Copy Masks */
+    .line-mask {
+      display: block;
+      overflow: hidden;
+      padding-bottom: 0.06em;
+    }
+
+    .line-inner {
+      display: block;
+      transform: translateY(108%);
+      opacity: 0;
+      transition: transform 0.85s cubic-bezier(0.19, 1, 0.22, 1),
+                  opacity 0.75s cubic-bezier(0.19, 1, 0.22, 1);
+      will-change: transform, opacity;
+    }
+
+    .is-visible .line-inner,
+    .is-ready .hero .line-inner {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .delay-1 { transition-delay: 0.07s; }
+    .delay-2 { transition-delay: 0.16s; }
+    .delay-3 { transition-delay: 0.25s; }
+    .delay-4 { transition-delay: 0.34s; }
+
+    .hero .section-title {
+      font-size: clamp(42px, 5vw, 74px);
+      font-weight: 520;
+      line-height: 0.94;
+      color: var(--text-cream);
+      letter-spacing: -0.01em;
+    }
+
+    .hero .section-title em {
+      display: block;
+      color: var(--accent-gold);
+      font-weight: 400;
+      margin-top: 4px;
+    }
+
+    .hero .section-copy {
+      max-width: 430px;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.55;
+      color: var(--text-sand);
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 22px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--bg-obsidian);
+      background-color: var(--accent-caramel);
+      border: 1px solid var(--accent-caramel);
+      border-radius: var(--radius-max);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-gold);
+      border-color: var(--accent-gold);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 28px rgba(200, 132, 52, 0.26);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--text-cream);
+      background: rgba(244, 236, 225, 0.05);
+      border: 1px solid rgba(244, 236, 225, 0.16);
+      border-radius: var(--radius-max);
+      text-decoration: none;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(244, 236, 225, 0.12);
+      border-color: rgba(244, 236, 225, 0.34);
+    }
+
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+
+    .is-ready .hero .reveal-item,
+    .is-visible .reveal-item,
+    .reveal-item.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hero-footer {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .hero-footer-divider {
+      flex: 1;
+      height: 1px;
+      margin: 0 24px;
+      background: linear-gradient(90deg, transparent, rgba(244, 236, 225, 0.12), transparent);
+    }
+
+    /* ==========================================================================
+       02. CONCEPTO @NUDAS_CO: LA PAUSA & FILOSOFÍA (Three.js 3D Sculpture)
+       ========================================================================== */
+    .section-pausa {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 110px 48px 125px;
+      background:
+        radial-gradient(60% 55% at 74% 50%, rgba(200, 132, 52, 0.09) 0%, transparent 72%),
+        linear-gradient(180deg, var(--bg-obsidian) 0%, var(--bg-espresso) 50%, var(--bg-obsidian) 100%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .pausa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.12fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent-caramel);
+      margin-bottom: 16px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background-color: var(--accent-caramel);
+    }
+
+    .section-heading {
+      font-size: clamp(36px, 4.1vw, 60px);
+      font-weight: 520;
+      line-height: 0.96;
+      color: var(--text-cream);
+      margin-bottom: 18px;
+    }
+
+    .section-heading em {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-gold);
+    }
+
+    .lead-short {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-sand);
+      max-width: 460px;
+      margin-bottom: 32px;
+    }
+
+    .pausa-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pausa-step {
+      text-align: left;
+      background: rgba(244, 236, 225, 0.02);
+      border: 1px solid rgba(244, 236, 225, 0.07);
+      border-radius: var(--radius-max);
+      padding: 18px 22px;
+      cursor: pointer;
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .pausa-step:hover,
+    .pausa-step.is-active {
+      background: rgba(200, 132, 52, 0.09);
+      border-color: rgba(200, 132, 52, 0.38);
+      transform: translateX(4px);
+    }
+
+    .step-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .step-index {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent-caramel);
+    }
+
+    .step-title {
+      font-size: 15.5px;
+      font-weight: 500;
+      color: var(--text-cream);
+    }
+
+    .step-title em {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--text-sand);
+      margin-left: 6px;
+    }
+
+    .step-desc {
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--text-sand);
+    }
+
+    .ritual-stage-wrap {
+      position: relative;
+      width: 100%;
+      height: 510px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #three-knot-stage {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    #three-knot-stage:active {
+      cursor: grabbing;
+    }
+
+    .stage-caption {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       03. CATÁLOGO OFICIAL LIDER.CL (6 Café en Grano 250g + 6 SipO's 105g)
+       ========================================================================== */
+    .section-catalog {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 110px 48px 140px;
+      background:
+        radial-gradient(75% 55% at 50% 42%, rgba(200, 132, 52, 0.06) 0%, transparent 75%),
+        linear-gradient(180deg, var(--bg-obsidian) 0%, #110c08 50%, var(--bg-obsidian) 100%);
+    }
+
+    .catalog-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 42px;
+    }
+
+    .catalog-header .eyebrow::before {
+      display: none;
+    }
+
+    /* Format Filter Switcher */
+    .catalog-filters {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      background: rgba(244, 236, 225, 0.03);
+      border: 1px solid rgba(244, 236, 225, 0.09);
+      border-radius: var(--radius-max);
+      margin-bottom: 56px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sand);
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .filter-btn:hover {
+      color: var(--text-cream);
+    }
+
+    .filter-btn.is-active {
+      background: var(--accent-caramel);
+      color: var(--bg-obsidian);
+      font-weight: 600;
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .product-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 26px 24px 26px;
+      border-radius: var(--radius-max);
+      background: linear-gradient(180deg, rgba(244, 236, 225, 0.02) 0%, rgba(244, 236, 225, 0.04) 100%);
+      border: 1px solid rgba(244, 236, 225, 0.07);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.4s ease,
+                  background 0.4s ease;
+    }
+
+    .product-card[hidden] {
+      display: none !important;
+    }
+
+    .product-card:hover {
+      transform: translateY(-7px);
+      border-color: rgba(200, 132, 52, 0.36);
+      background: linear-gradient(180deg, rgba(200, 132, 52, 0.05) 0%, rgba(244, 236, 225, 0.055) 100%);
+    }
+
+    .card-top-badges {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .badge-format {
+      padding: 4px 9px;
+      border-radius: 4px;
+      background: rgba(244, 236, 225, 0.06);
+      color: var(--text-sand);
+    }
+
+    .badge-altitude {
+      color: var(--accent-caramel);
+    }
+
+    /* Official Transparent Cutout Bag Display */
+    .bag-stage {
+      position: relative;
+      width: 100%;
+      height: 270px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 6px 0 18px;
+    }
+
+    .bag-aura {
+      position: absolute;
+      width: 195px;
+      height: 195px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--origin-glow, rgba(200, 132, 52, 0.25)) 0%, transparent 72%);
+      filter: blur(18px);
+      opacity: 0.78;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .product-card:hover .bag-aura {
+      transform: scale(1.24);
+      opacity: 1;
+    }
+
+    .bag-cutout-img {
+      position: relative;
+      z-index: 1;
+      max-height: 255px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.68));
+      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      user-select: none;
+    }
+
+    .product-card:hover .bag-cutout-img {
+      transform: translateY(-6px) scale(1.035);
+    }
+
+    .product-country {
+      font-size: 25px;
+      font-weight: 520;
+      color: var(--text-cream);
+      line-height: 1.05;
+      margin-bottom: 4px;
+    }
+
+    .product-country em {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 0.88em;
+      color: var(--text-sand);
+    }
+
+    .product-region {
+      font-size: 12.5px;
+      color: var(--text-sand);
+      margin-bottom: 14px;
+    }
+
+    /* Technical Specs & Sensory Dots from Official Nudas Label */
+    .product-specs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line-subtle);
+      border-bottom: 1px solid var(--line-subtle);
+      margin-bottom: 14px;
+      font-size: 11.5px;
+    }
+
+    .spec-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .spec-item {
+      color: var(--text-muted);
+    }
+
+    .spec-item strong {
+      color: var(--text-cream);
+      font-weight: 500;
+    }
+
+    .sensory-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .sensory-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+
+    .dots {
+      display: inline-flex;
+      gap: 3px;
+    }
+
+    .dot {
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 50%;
+      border: 1px solid var(--origin-accent, var(--accent-caramel));
+      background: transparent;
+    }
+
+    .dot.is-filled {
+      background: var(--origin-accent, var(--accent-caramel));
+    }
+
+    /* Price & Lider.cl Action Row */
+    .card-footer-row {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    .price-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-current {
+      font-size: 21px;
+      font-weight: 600;
+      color: var(--text-cream);
+      line-height: 1.1;
+    }
+
+    .price-old {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .price-old s {
+      margin-right: 4px;
+    }
+
+    .btn-card-lider {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 15px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-cream);
+      background: rgba(244, 236, 225, 0.06);
+      border: 1px solid rgba(244, 236, 225, 0.16);
+      border-radius: var(--radius-max);
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .btn-card-lider:hover {
+      background: var(--accent-caramel);
+      border-color: var(--accent-caramel);
+      color: var(--bg-obsidian);
+    }
+
+    /* ==========================================================================
+       04. EL RITUAL SIPO'S — "ABRE, VIERTE, DISFRUTA" (Concepto @nudas_co)
+       ========================================================================== */
+    .section-sipo {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 110px 48px 130px;
+      background:
+        radial-gradient(60% 50% at 24% 50%, rgba(200, 132, 52, 0.08) 0%, transparent 72%),
+        linear-gradient(180deg, var(--bg-obsidian) 0%, var(--bg-espresso) 55%, var(--bg-obsidian) 100%);
+    }
+
+    .sipo-layout {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .sipo-steps-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .sipo-step-card {
+      padding: 22px 20px;
+      border-radius: var(--radius-max);
+      background: rgba(244, 236, 225, 0.025);
+      border: 1px solid rgba(244, 236, 225, 0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .sipo-step-card:hover {
+      border-color: rgba(200, 132, 52, 0.35);
+      transform: translateY(-3px);
+    }
+
+    .sipo-step-num {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent-caramel);
+      text-transform: uppercase;
+    }
+
+    .sipo-step-title {
+      font-size: 19px;
+      font-weight: 520;
+      color: var(--text-cream);
+    }
+
+    .sipo-step-title em {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-gold);
+    }
+
+    .sipo-step-text {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-sand);
+    }
+
+    /* Interactive SipO's Showcase Stage */
+    .sipo-showcase {
+      position: relative;
+      padding: 36px 32px;
+      border-radius: var(--radius-max);
+      background: linear-gradient(180deg, rgba(244, 236, 225, 0.02) 0%, rgba(244, 236, 225, 0.045) 100%);
+      border: 1px solid rgba(244, 236, 225, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .sipo-preview-wrap {
+      position: relative;
+      height: 310px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .sipo-preview-img {
+      max-height: 295px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 22px 32px rgba(0, 0, 0, 0.72));
+      transition: transform 0.35s ease, opacity 0.25s ease;
+    }
+
+    .sipo-origin-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .sipo-pill {
+      padding: 7px 13px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-sand);
+      background: rgba(244, 236, 225, 0.04);
+      border: 1px solid rgba(244, 236, 225, 0.1);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sipo-pill.is-active,
+    .sipo-pill:hover {
+      background: var(--accent-caramel);
+      border-color: var(--accent-caramel);
+      color: var(--bg-obsidian);
+    }
+
+    .sipo-quote {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-sand);
+      max-width: 420px;
+      margin-bottom: 18px;
+    }
+
+    /* ==========================================================================
+       05. CIERRE EDITORIAL & FOOTER
+       ========================================================================== */
+    .site-closing {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      padding: 90px 48px 56px;
+      text-align: center;
+      background:
+        radial-gradient(50% 45% at 50% 35%, rgba(200, 132, 52, 0.09) 0%, transparent 70%),
+        linear-gradient(180deg, var(--bg-obsidian) 0%, #080604 100%);
+    }
+
+    .closing-inner {
+      max-width: 600px;
+      margin: 0 auto 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .closing-logo {
+      width: 180px;
+      height: auto;
+      opacity: 0.94;
+      margin-bottom: 4px;
+    }
+
+    .closing-title {
+      font-size: clamp(32px, 3.8vw, 52px);
+      font-weight: 520;
+      line-height: 0.96;
+      color: var(--text-cream);
+    }
+
+    .closing-title em {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--accent-gold);
+    }
+
+    .closing-copy {
+      font-size: 14.5px;
+      color: var(--text-sand);
+      max-width: 440px;
+      line-height: 1.55;
+    }
+
+    .footer-bottom {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding-top: 28px;
+      border-top: 1px solid rgba(244, 236, 225, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: var(--text-sand);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-cream);
+    }
+
+    /* ==========================================================================
+       RESPONSIVE DESIGN
+       ========================================================================== */
+    @media (max-width: 1040px) {
+      .catalog-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pausa-grid,
+      .sipo-layout {
+        grid-template-columns: 1fr;
+        gap: 44px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .section-nav,
+      .header-ig-link {
+        display: none;
+      }
+
+      .site-header,
+      .site-header.is-scrolled {
+        padding: 16px 22px;
+      }
+
+      .hero {
+        padding: 84px 22px 28px;
+      }
+
+      .hero-edge {
+        background:
+          linear-gradient(0deg,
+            var(--bg-obsidian) 0%,
+            rgba(12, 9, 7, 0.92) 26%,
+            rgba(12, 9, 7, 0.58) 58%,
+            rgba(12, 9, 7, 0.35) 100%
+          );
+      }
+
+      .hero-stage {
+        grid-template-columns: 1fr;
+        margin-top: auto;
+        margin-bottom: 22px;
+      }
+
+      .hero-logo-img {
+        width: clamp(160px, 46vw, 220px);
+      }
+
+      .hero .section-title {
+        font-size: clamp(40px, 11.5vw, 58px);
+      }
+
+      .hero-footer {
+        font-size: 10px;
+      }
+
+      .hero-footer-divider {
+        display: none;
+      }
+
+      .section-pausa,
+      .section-catalog,
+      .section-sipo,
+      .site-closing {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      .catalog-grid,
+      .sipo-steps-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ritual-stage-wrap {
+        height: 380px;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .line-inner,
+      .reveal-item {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Three.js Golden-Hour & Roast Aroma Particle Canvas -->
+  <canvas id="webgl-atmosphere" aria-hidden="true"></canvas>
+
+  <!-- Floating Navigation Header -->
+  <header class="site-header" id="site-header">
+    <a href="#hero" class="section-brand">
+      <svg class="brand-knot-icon" viewBox="0 0 48 22" aria-hidden="true">
+        <path d="M2 11 C10 11, 14 3, 21 3 C28 3, 20 19, 27 19 C34 19, 38 11, 46 11" stroke-linecap="round"/>
+        <path d="M2 11 C10 11, 14 19, 21 19 C28 19, 20 3, 27 3 C34 3, 38 11, 46 11" stroke-linecap="round" opacity="0.65"/>
+      </svg>
+      <span>NUDAS</span>
+    </a>
+
+    <nav aria-label="Navegación principal">
+      <ul class="section-nav">
+        <li><a href="#pausa">La Pausa</a></li>
+        <li><a href="#catalogo">Catálogo Lider.cl</a></li>
+        <li><a href="#sipo">Ritual SipO's</a></li>
+        <li><a href="#cierre">Frescura</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a href="https://www.instagram.com/nudas_co/" target="_blank" rel="noopener noreferrer" class="header-ig-link">@nudas_co</a>
+      <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="header-bag-pill">
+        <span>Tienda Lider.cl</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       01. HERO SECTION — Clean Video Loop + Non-Overlapping Logo & Copy Stack
+       ======================================================================== -->
+  <section class="hero" id="hero">
+    <video
+      class="hero-video"
+      id="hero-video"
+      src="./media/nudas-hero-loop.mp4"
+      poster="./media/nudas-hero-bg-clean.jpg"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="metadata"
+      aria-hidden="true"
+    ></video>
+
+    <div class="hero-edge" aria-hidden="true"></div>
+
+    <div class="hero-stage">
+      <div class="hero-content">
+        <div class="hero-logo-block reveal-item delay-1">
+          <img
+            src="./media/nudas-logo-light.png"
+            alt="Nudas — Cafetería Online"
+            class="hero-logo-img"
+            width="290"
+            height="190"
+          >
+        </div>
+
+        <h1 class="section-title">
+          <span class="line-mask"><span class="line-inner delay-2">Desata la rutina.</span></span>
+          <span class="line-mask"><span class="line-inner delay-3"><em>Regálate una pausa.</em></span></span>
+        </h1>
+
+        <p class="section-copy reveal-item delay-3">
+          Café de especialidad de origen en grano entero (250 g) y filtros portátiles SipO's (105 g). Seis orígenes latinoamericanos tostados en Chile.
+        </p>
+
+        <div class="hero-actions reveal-item delay-4">
+          <a href="#catalogo" class="btn-primary">Ver catálogo oficial</a>
+          <a href="#sipo" class="btn-ghost">Conocer SipO's</a>
+        </div>
+      </div>
+    </div>
+
+    <footer class="hero-footer">
+      <span>COLOMBIA · BOLIVIA · EL SALVADOR · GUATEMALA · HONDURAS · COSTA RICA</span>
+      <span class="hero-footer-divider" aria-hidden="true"></span>
+      <span>DISPONIBLE EN LIDER.CL · @NUDAS_CO</span>
+    </footer>
+  </section>
+
+  <!-- ========================================================================
+       02. FILOSOFÍA @NUDAS_CO: LA PAUSA CONSCIENTE (Three.js 3D Sculpture)
+       ======================================================================== -->
+  <section class="section-pausa observe-section" id="pausa">
+    <div class="container">
+      <div class="pausa-grid">
+        <div class="pausa-copy-col">
+          <span class="eyebrow reveal-item">01 · Filosofía @nudas_co</span>
+          <h2 class="section-heading">
+            <span class="line-mask"><span class="line-inner delay-1">Bajar las revoluciones</span></span>
+            <span class="line-mask"><span class="line-inner delay-2"><em>en cada taza.</em></span></span>
+          </h2>
+          <p class="lead-short reveal-item delay-2">
+            En Nudas entendemos el café como un refugio frente a la prisa. Tostamos en Santiago granos trazables de seis países para que disfrutes el origen sin complicaciones.
+          </p>
+
+          <div class="pausa-steps reveal-item delay-3" role="tablist" aria-label="Pilares de Nudas">
+            <button type="button" class="pausa-step is-active" data-step="0" role="tab" aria-selected="true">
+              <div class="step-top">
+                <span class="step-title">Desconexión real <em>El ritual</em></span>
+                <span class="step-index">01</span>
+              </div>
+              <p class="step-desc">Una pausa consciente frente al estrés y las pantallas. Moler o filtrar como acto de calma diaria.</p>
+            </button>
+
+            <button type="button" class="pausa-step" data-step="1" role="tab" aria-selected="false">
+              <div class="step-top">
+                <span class="step-title">Seis orígenes nobles <em>1.500 — 1.700 msnm</em></span>
+                <span class="step-index">02</span>
+              </div>
+              <p class="step-desc">Caturra, Catuaí, Castillo, Bourbon y Pacamara cultivados en altura en Colombia, Bolivia, El Salvador, Guatemala, Honduras y Costa Rica.</p>
+            </button>
+
+            <button type="button" class="pausa-step" data-step="2" role="tab" aria-selected="false">
+              <div class="step-top">
+                <span class="step-title">Ventana óptima <em>15 a 60 días</em></span>
+                <span class="step-index">03</span>
+              </div>
+              <p class="step-desc">Envase con válvula desgasificadora y cierre zipper para disfrutar el café en su curva máxima de aroma tras la fecha de tueste.</p>
+            </button>
+          </div>
+        </div>
+
+        <div class="ritual-stage-wrap reveal-item delay-2">
+          <canvas id="three-knot-stage" aria-label="Escultura 3D interactiva del nudo Nudas y granos de café"></canvas>
+          <span class="stage-caption">Arrastra o explora cada pilar · Escultura WebGL Three.js</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       03. CATÁLOGO OFICIAL LIDER.CL — Imágenes, Orígenes y Precios Reales
+       ======================================================================== -->
+  <section class="section-catalog observe-section" id="catalogo">
+    <div class="container">
+      <div class="catalog-header">
+        <span class="eyebrow reveal-item">02 · Catálogo Oficial en Lider.cl</span>
+        <h2 class="section-heading">
+          <span class="line-mask"><span class="line-inner delay-1">Seis países de origen.</span></span>
+          <span class="line-mask"><span class="line-inner delay-2"><em>Dos formatos a tu medida.</em></span></span>
+        </h2>
+        <p class="lead-short reveal-item delay-2" style="margin-bottom: 28px;">
+          Elige nuestras bolsas de <strong>Café en Grano (250 g)</strong> para moler en casa o las cajas de <strong>SipO's (10 filtros individuales × 15 g)</strong> para llevar a cualquier parte.
+        </p>
+
+        <div class="catalog-filters reveal-item delay-3" role="tablist" aria-label="Filtrar por formato">
+          <button type="button" class="filter-btn is-active" data-filter="grano" role="tab" aria-selected="true">Café en Grano · 250 g ($10.990)</button>
+          <button type="button" class="filter-btn" data-filter="sipo" role="tab" aria-selected="false">SipO's Drip Portátil · 105 g ($7.590)</button>
+          <button type="button" class="filter-btn" data-filter="all" role="tab" aria-selected="false">Ver los 12 productos</button>
+        </div>
+      </div>
+
+      <div class="catalog-grid" id="catalog-grid">
+
+        <!-- ===================== CAFÉ EN GRANO 250 G ($10.990) ===================== -->
+
+        <!-- 1. Grano Colombia -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(140, 47, 63, 0.34); --origin-accent: #b84a5e;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.700 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-colombia-cutout.png" alt="Café en Grano Nudas Colombia 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">Colombia <em>Caldas</em></h3>
+          <p class="product-region">Manzanares, Caldas · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Variedad: <strong>Castillo, Caturra</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/ip/cafe-te-y-hierbas/cafe-en-grano-colombia-250-g/03732702339094" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 2. Grano Bolivia -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(184, 67, 62, 0.32); --origin-accent: #cf5650;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-bolivia-cutout.png" alt="Café en Grano Nudas Bolivia 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">Bolivia <em>Caranavi</em></h3>
+          <p class="product-region">Caranavi, Yungas · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Variedad: <strong>Catuaí, Caturra</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/ip/cafe-te-y-hierbas/cafe-en-grano-bolivia-250-g/03732702332445" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 3. Grano El Salvador -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(29, 85, 110, 0.36); --origin-accent: #398ab0;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.600 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-el-salvador-cutout.png" alt="Café en Grano Nudas El Salvador 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">El Salvador <em>Chinameca</em></h3>
+          <p class="product-region">Valle Dentecapa, Chinameca · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Natural</strong></span>
+              <span class="spec-item">Variedad: <strong>Bourbon, Pacamara</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 4. Grano Guatemala -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(36, 89, 79, 0.36); --origin-accent: #3d9987;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-guatemala-cutout.png" alt="Café en Grano Nudas Guatemala 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">Guatemala <em>Huehuetenango</em></h3>
+          <p class="product-region">La Libertad, Huehuetenango · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Variedad: <strong>Catuaí, Caturra</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 5. Grano Honduras -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(94, 108, 94, 0.34); --origin-accent: #829682;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.650 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-honduras-cutout.png" alt="Café en Grano Nudas Honduras 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">Honduras <em>La Paz</em></h3>
+          <p class="product-region">El Jardín, Manzanillo, La Paz · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Natural</strong></span>
+              <span class="spec-item">Variedad: <strong>Catuaí</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 6. Grano Costa Rica -->
+        <article class="product-card" data-category="grano" style="--origin-glow: rgba(17, 111, 150, 0.36); --origin-accent: #2d9cc9;">
+          <div class="card-top-badges">
+            <span class="badge-format">Grano Entero · 250 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/grano-costa-rica-cutout.png" alt="Café en Grano Nudas Costa Rica 250 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">Costa Rica <em>Guacamayo</em></h3>
+          <p class="product-region">Guacamayo, Valle Occidental · Tueste Medio</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Variedad: <strong>Caturra, Catuaí</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$10.990</span>
+              <span class="price-old"><s>$13.490</s> · $44/g</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- ===================== SIPO'S DRIP PORTÁTIL 105 G ($7.590) ===================== -->
+
+        <!-- 7. SipO's Colombia -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(140, 47, 63, 0.34); --origin-accent: #b84a5e;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.700 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-colombia-cutout.png" alt="SipO's de Café Nudas Colombia 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>Colombia</em></h3>
+          <p class="product-region">Manzanares, Caldas · Filtro individual listo en 3 min</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 8. SipO's Costa Rica -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(17, 111, 150, 0.36); --origin-accent: #2d9cc9;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-costa-rica-cutout.png" alt="SipO's de Café Nudas Costa Rica 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>Costa Rica</em></h3>
+          <p class="product-region">Guacamayo, Valle Occidental · Filtro individual</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://apps.lider.cl/ip/cafe-te-y-hierbas/sipo-s-de-cafe-costa-rica-105-g/03732702335985" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 9. SipO's Guatemala -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(36, 89, 79, 0.36); --origin-accent: #3d9987;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-guatemala-cutout.png" alt="SipO's de Café Nudas Guatemala 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>Guatemala</em></h3>
+          <p class="product-region">La Libertad, Huehuetenango · Filtro individual</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 10. SipO's Bolivia -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(184, 67, 62, 0.32); --origin-accent: #cf5650;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.500 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-bolivia-cutout.png" alt="SipO's de Café Nudas Bolivia 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>Bolivia</em></h3>
+          <p class="product-region">Caranavi, Yungas · Filtro individual</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Lavado</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 11. SipO's Honduras -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(94, 108, 94, 0.34); --origin-accent: #829682;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.650 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-honduras-cutout.png" alt="SipO's de Café Nudas Honduras 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>Honduras</em></h3>
+          <p class="product-region">El Jardín, Manzanillo, La Paz · Filtro individual</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Natural</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+        <!-- 12. SipO's El Salvador -->
+        <article class="product-card" data-category="sipo" hidden style="--origin-glow: rgba(29, 85, 110, 0.36); --origin-accent: #398ab0;">
+          <div class="card-top-badges">
+            <span class="badge-format">10 SipO's Drip · 105 g</span>
+            <span class="badge-altitude">1.600 MSNM</span>
+          </div>
+          <div class="bag-stage">
+            <div class="bag-aura" aria-hidden="true"></div>
+            <img src="./media/lider/sipo-el-salvador-cutout.png" alt="SipO's de Café Nudas El Salvador 105 g" class="bag-cutout-img" width="220" height="275" loading="lazy">
+          </div>
+          <h3 class="product-country">SipO's <em>El Salvador</em></h3>
+          <p class="product-region">Valle Dentecapa, Chinameca · Filtro individual</p>
+          <div class="product-specs">
+            <div class="spec-col">
+              <span class="spec-item">Proceso: <strong>Natural</strong></span>
+              <span class="spec-item">Formato: <strong>10 sobres (15g c/u)</strong></span>
+            </div>
+            <div class="sensory-rows">
+              <div class="sensory-row"><span>ACIDEZ</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i><i class="dot"></i></span></div>
+              <div class="sensory-row"><span>DULZOR</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i></span></div>
+              <div class="sensory-row"><span>CUERPO</span><span class="dots"><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot is-filled"></i><i class="dot"></i></span></div>
+            </div>
+          </div>
+          <div class="card-footer-row">
+            <div class="price-block">
+              <span class="price-current">$7.590</span>
+              <span class="price-old"><s>$9.990</s> · 10 unidades</span>
+            </div>
+            <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-card-lider">Ver en Lider.cl ↗</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       04. EL RITUAL SIPO'S — "¿Qué es un SipO? Abre, Vierte, Disfruta"
+       ======================================================================== -->
+  <section class="section-sipo observe-section" id="sipo">
+    <div class="container">
+      <div class="sipo-layout">
+        <div class="sipo-copy">
+          <span class="eyebrow reveal-item">03 · Innovación Práctica · ¿Qué es un SipO?</span>
+          <h2 class="section-heading">
+            <span class="line-mask"><span class="line-inner delay-1">Abre, vierte,</span></span>
+            <span class="line-mask"><span class="line-inner delay-2"><em>disfruta donde quieras.</em></span></span>
+          </h2>
+          <p class="lead-short reveal-item delay-2" style="margin-bottom: 8px;">
+            Café de especialidad Nudas en formato filtro individual portátil. Sin molinos ni cafeteras complejas: solo necesitas tu taza y agua caliente.
+          </p>
+
+          <div class="sipo-steps-grid reveal-item delay-3">
+            <div class="sipo-step-card">
+              <span class="sipo-step-num">Paso 01</span>
+              <h3 class="sipo-step-title">Abre <em>el filtro</em></h3>
+              <p class="sipo-step-text">Rasga el sello superior del sobre individual de 15 g siguiendo la línea punteada.</p>
+            </div>
+
+            <div class="sipo-step-card">
+              <span class="sipo-step-num">Paso 02</span>
+              <h3 class="sipo-step-title">Ancla <em>en tu taza</em></h3>
+              <p class="sipo-step-text">Despliega los soportes laterales del filtro y apóyalos firmes sobre los bordes de la taza.</p>
+            </div>
+
+            <div class="sipo-step-card">
+              <span class="sipo-step-num">Paso 03</span>
+              <h3 class="sipo-step-title">Vierte <em>en calma</em></h3>
+              <p class="sipo-step-text">Humedece primero el café durante 30 s y luego completa con agua caliente (92–94 °C).</p>
+            </div>
+
+            <div class="sipo-step-card">
+              <span class="sipo-step-num">Paso 04</span>
+              <h3 class="sipo-step-title">Disfruta <em>el origen</em></h3>
+              <p class="sipo-step-text">Retira el filtro y disfruta una taza limpia de especialidad en la oficina, en casa o en la montaña.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sipo-showcase reveal-item delay-2">
+          <div class="sipo-preview-wrap">
+            <div class="bag-aura" id="sipo-aura" style="--origin-glow: rgba(140, 47, 63, 0.38);" aria-hidden="true"></div>
+            <img
+              src="./media/lider/sipo-colombia-cutout.png"
+              alt="SipO's de Café Nudas"
+              class="sipo-preview-img"
+              id="sipo-preview-img"
+              width="240"
+              height="300"
+              loading="lazy"
+            >
+          </div>
+
+          <div class="sipo-origin-pills" role="tablist" aria-label="Explorar orígenes SipO's">
+            <button type="button" class="sipo-pill is-active" data-sipo="colombia">Colombia</button>
+            <button type="button" class="sipo-pill" data-sipo="costa-rica">Costa Rica</button>
+            <button type="button" class="sipo-pill" data-sipo="guatemala">Guatemala</button>
+            <button type="button" class="sipo-pill" data-sipo="bolivia">Bolivia</button>
+            <button type="button" class="sipo-pill" data-sipo="honduras">Honduras</button>
+            <button type="button" class="sipo-pill" data-sipo="el-salvador">El Salvador</button>
+          </div>
+
+          <p class="sipo-quote" id="sipo-quote">
+            <strong>SipO's Colombia · 1.700 msnm:</strong> Manzanares, Caldas · Lavado (Castillo, Caturra). 10 filtros individuales de 15 g — <strong>$7.590 en Lider.cl</strong>.
+          </p>
+
+          <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-primary">Comprar SipO's en Lider.cl</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       05. CIERRE EDITORIAL & SUGERENCIAS DE FRESCURA NUDAS
+       ======================================================================== -->
+  <footer class="site-closing observe-section" id="cierre">
+    <div class="closing-inner">
+      <img
+        src="./media/nudas-logo-light.png"
+        alt="Nudas Cafetería Online"
+        class="closing-logo reveal-item"
+        width="180"
+        height="118"
+        loading="lazy"
+      >
+      <h2 class="closing-title">
+        <span class="line-mask"><span class="line-inner delay-1">Te estamos esperando.</span></span>
+        <span class="line-mask"><span class="line-inner delay-2"><em>De 15 a 60 días post-tueste.</em></span></span>
+      </h2>
+      <p class="closing-copy reveal-item delay-2">
+        Para disfrutar al máximo las cualidades de nuestro café, consúmelo entre los 15 y 60 días posteriores a su fecha de tueste y consérvalo en un lugar fresco y seco.
+      </p>
+      <div class="hero-actions reveal-item delay-3">
+        <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer" class="btn-primary">Comprar en Lider.cl</a>
+        <a href="https://www.instagram.com/nudas_co/" target="_blank" rel="noopener noreferrer" class="btn-ghost">Seguir a @nudas_co</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© NUDAS CAFETERÍA ONLINE · ELABORADO Y ENVASADO EN SANTIAGO, CHILE</span>
+      <div class="footer-links">
+        <a href="https://www.lider.cl/search?q=nudas" target="_blank" rel="noopener noreferrer">Catálogo Lider.cl</a>
+        <a href="https://www.instagram.com/nudas_co/" target="_blank" rel="noopener noreferrer">Instagram @nudas_co</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const hero = document.getElementById('hero');
+      const video = document.getElementById('hero-video');
+      const header = document.getElementById('site-header');
+      const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      /* 1. Initial Hero Entrance & Motion Preference */
+      function applyMotionPreference() {
+        document.body.classList.add('is-ready');
+        if (reducedMotionQuery.matches && video) {
+          video.pause();
+          video.removeAttribute('autoplay');
+          video.load();
+        }
+      }
+
+      applyMotionPreference();
+      if (typeof reducedMotionQuery.addEventListener === 'function') {
+        reducedMotionQuery.addEventListener('change', applyMotionPreference);
+      }
+
+      /* 2. Sticky Header Scroll State */
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 40) {
+          header.classList.add('is-scrolled');
+        } else {
+          header.classList.remove('is-scrolled');
+        }
+      }, { passive: true });
+
+      /* 3. Pause Hero Video Outside Viewport + Trigger Section Copy Animations */
+      if ('IntersectionObserver' in window) {
+        if (video && hero) {
+          const videoObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting || reducedMotionQuery.matches) {
+                video.pause();
+              } else {
+                video.play().catch(function () {});
+              }
+            });
+          }, { threshold: 0.05 });
+          videoObserver.observe(hero);
+        }
+
+        const sectionObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+            }
+          });
+        }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+
+        document.querySelectorAll('.observe-section').forEach(function (sec) {
+          sectionObserver.observe(sec);
+        });
+      } else {
+        document.querySelectorAll('.observe-section').forEach(function (sec) {
+          sec.classList.add('is-visible');
+        });
+      }
+
+      /* 4. Official Catalog Filter Tabs (Café en Grano 250g vs SipO's 105g vs Todos) */
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const productCards = document.querySelectorAll('.product-card');
+
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          filterBtns.forEach(function (b) {
+            b.classList.remove('is-active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('is-active');
+          btn.setAttribute('aria-selected', 'true');
+
+          const filter = btn.getAttribute('data-filter');
+          productCards.forEach(function (card) {
+            const cat = card.getAttribute('data-category');
+            if (filter === 'all' || cat === filter) {
+              card.removeAttribute('hidden');
+            } else {
+              card.setAttribute('hidden', '');
+            }
+          });
+        });
+      });
+
+      /* 5. Interactive SipO's Origin Previewer */
+      const sipoData = {
+        'colombia': {
+          img: './media/lider/sipo-colombia-cutout.png',
+          glow: 'rgba(140, 47, 63, 0.38)',
+          desc: '<strong>SipO\'s Colombia · 1.700 msnm:</strong> Manzanares, Caldas · Lavado (Castillo, Caturra). 10 filtros individuales de 15 g — <strong>$7.590 en Lider.cl</strong>.'
+        },
+        'costa-rica': {
+          img: './media/lider/sipo-costa-rica-cutout.png',
+          glow: 'rgba(17, 111, 150, 0.38)',
+          desc: '<strong>SipO\'s Costa Rica · 1.500 msnm:</strong> Guacamayo, Valle Occidental · Lavado (Caturra, Catuaí). Dulzor 5/5 — <strong>$7.590 en Lider.cl</strong>.'
+        },
+        'guatemala': {
+          img: './media/lider/sipo-guatemala-cutout.png',
+          glow: 'rgba(36, 89, 79, 0.38)',
+          desc: '<strong>SipO\'s Guatemala · 1.500 msnm:</strong> La Libertad, Huehuetenango · Lavado (Catuaí, Caturra). Cuerpo 5/5 — <strong>$7.590 en Lider.cl</strong>.'
+        },
+        'bolivia': {
+          img: './media/lider/sipo-bolivia-cutout.png',
+          glow: 'rgba(184, 67, 62, 0.38)',
+          desc: '<strong>SipO\'s Bolivia · 1.500 msnm:</strong> Caranavi, Yungas · Lavado (Catuaí, Caturra). Equilibrio brillante — <strong>$7.590 en Lider.cl</strong>.'
+        },
+        'honduras': {
+          img: './media/lider/sipo-honduras-cutout.png',
+          glow: 'rgba(94, 108, 94, 0.38)',
+          desc: '<strong>SipO\'s Honduras · 1.650 msnm:</strong> El Jardín, Manzanillo, La Paz · Proceso Natural (Catuaí) — <strong>$7.590 en Lider.cl</strong>.'
+        },
+        'el-salvador': {
+          img: './media/lider/sipo-el-salvador-cutout.png',
+          glow: 'rgba(29, 85, 110, 0.38)',
+          desc: '<strong>SipO\'s El Salvador · 1.600 msnm:</strong> Valle Dentecapa, Chinameca · Natural (Bourbon, Pacamara). Dulzor 5/5 — <strong>$7.590 en Lider.cl</strong>.'
+        }
+      };
+
+      const sipoPills = document.querySelectorAll('.sipo-pill');
+      const sipoImg = document.getElementById('sipo-preview-img');
+      const sipoAura = document.getElementById('sipo-aura');
+      const sipoQuote = document.getElementById('sipo-quote');
+
+      sipoPills.forEach(function (pill) {
+        pill.addEventListener('click', function () {
+          sipoPills.forEach(function (p) { p.classList.remove('is-active'); });
+          pill.classList.add('is-active');
+          const key = pill.getAttribute('data-sipo');
+          const info = sipoData[key];
+          if (info && sipoImg) {
+            sipoImg.style.opacity = '0.3';
+            sipoImg.style.transform = 'scale(0.96)';
+            setTimeout(function () {
+              sipoImg.src = info.img;
+              sipoAura.style.setProperty('--origin-glow', info.glow);
+              sipoQuote.innerHTML = info.desc;
+              sipoImg.style.opacity = '1';
+              sipoImg.style.transform = 'scale(1)';
+            }, 140);
+          }
+        });
+      });
+
+      /* 6. THREE.JS ANIMATIONS (Ambient Particle Field + Interactive 3D Knot & Coffee Beans Sculpture) */
+      function initThreeVisuals() {
+        if (typeof THREE === 'undefined' || reducedMotionQuery.matches) return;
+
+        /* --- A. Ambient Golden-Hour & Roast Ember Particles (#webgl-atmosphere) --- */
+        const bgCanvas = document.getElementById('webgl-atmosphere');
+        if (bgCanvas) {
+          const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true, antialias: false });
+          bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+          bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+          const bgScene = new THREE.Scene();
+          const bgCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+          bgCamera.position.z = 12;
+
+          const count = 90;
+          const positions = new Float32Array(count * 3);
+          const phases = new Float32Array(count);
+          for (let i = 0; i < count; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 24;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 18;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 8;
+            phases[i] = Math.random() * Math.PI * 2;
+          }
+
+          const pGeo = new THREE.BufferGeometry();
+          pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+          const dotCanvas = document.createElement('canvas');
+          dotCanvas.width = 32;
+          dotCanvas.height = 32;
+          const dCtx = dotCanvas.getContext('2d');
+          const grad = dCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
+          grad.addColorStop(0, 'rgba(235, 175, 100, 1)');
+          grad.addColorStop(0.4, 'rgba(200, 132, 52, 0.45)');
+          grad.addColorStop(1, 'rgba(200, 132, 52, 0)');
+          dCtx.fillStyle = grad;
+          dCtx.fillRect(0, 0, 32, 32);
+          const dotTexture = new THREE.CanvasTexture(dotCanvas);
+
+          const pMat = new THREE.PointsMaterial({
+            size: 0.24,
+            map: dotTexture,
+            transparent: true,
+            opacity: 0.42,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+          });
+
+          const particleSystem = new THREE.Points(pGeo, pMat);
+          bgScene.add(particleSystem);
+
+          let scrollY = window.scrollY;
+          let mouseX = 0;
+          let mouseY = 0;
+
+          window.addEventListener('scroll', function () {
+            scrollY = window.scrollY;
+          }, { passive: true });
+
+          window.addEventListener('pointermove', function (e) {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.8;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.8;
+          }, { passive: true });
+
+          window.addEventListener('resize', function () {
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+            bgCamera.aspect = window.innerWidth / window.innerHeight;
+            bgCamera.updateProjectionMatrix();
+          });
+
+          let t = 0;
+          function animateBg() {
+            requestAnimationFrame(animateBg);
+            t += 0.008;
+            const posAttr = pGeo.attributes.position;
+            for (let i = 0; i < count; i++) {
+              let y = posAttr.getY(i) + 0.007;
+              if (y > 9) y = -9;
+              posAttr.setY(i, y);
+              posAttr.setX(i, posAttr.getX(i) + Math.sin(t + phases[i]) * 0.0025);
+            }
+            posAttr.needsUpdate = true;
+
+            particleSystem.rotation.y += (mouseX * 0.25 - particleSystem.rotation.y) * 0.04;
+            particleSystem.rotation.x += (-mouseY * 0.18 - particleSystem.rotation.x) * 0.04;
+            particleSystem.position.y = (scrollY * 0.0025) % 4;
+
+            bgRenderer.render(bgScene, bgCamera);
+          }
+          animateBg();
+        }
+
+        /* --- B. Interactive 3D Figure-Eight Knot & Orbiting Coffee Beans Sculpture (#three-knot-stage) --- */
+        const knotCanvas = document.getElementById('three-knot-stage');
+        if (!knotCanvas) return;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: knotCanvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+        camera.position.set(0, 0.2, 7.2);
+
+        function resizeStage() {
+          const rect = knotCanvas.parentElement.getBoundingClientRect();
+          renderer.setSize(rect.width, rect.height);
+          camera.aspect = rect.width / rect.height;
+          camera.updateProjectionMatrix();
+        }
+        resizeStage();
+        window.addEventListener('resize', resizeStage);
+
+        const rootGroup = new THREE.Group();
+        scene.add(rootGroup);
+
+        const ambientLight = new THREE.AmbientLight(0x3a281b, 1.3);
+        scene.add(ambientLight);
+
+        const keyLight = new THREE.DirectionalLight(0xffcf91, 2.4);
+        keyLight.position.set(4, 5, 4);
+        scene.add(keyLight);
+
+        const rimLight = new THREE.PointLight(0xc88434, 2.8, 16);
+        rimLight.position.set(-4, -2, 3);
+        scene.add(rimLight);
+
+        class FigureEightCurve extends THREE.Curve {
+          getPoint(t, optionalTarget = new THREE.Vector3()) {
+            const a = t * Math.PI * 2;
+            const x = 2.05 * Math.sin(a);
+            const y = 1.05 * Math.sin(2 * a);
+            const z = 0.42 * Math.cos(3 * a);
+            return optionalTarget.set(x, y, z);
+          }
+        }
+
+        const knotCurve = new FigureEightCurve();
+        const knotGeo = new THREE.TubeGeometry(knotCurve, 180, 0.19, 28, true);
+        const knotMat = new THREE.MeshStandardMaterial({
+          color: 0xc88434,
+          roughness: 0.34,
+          metalness: 0.68
+        });
+        const knotMesh = new THREE.Mesh(knotGeo, knotMat);
+        rootGroup.add(knotMesh);
+
+        class CompanionStrandCurve extends THREE.Curve {
+          getPoint(t, optionalTarget = new THREE.Vector3()) {
+            const a = t * Math.PI * 2;
+            const x = 2.05 * Math.sin(a) + 0.09 * Math.cos(a * 12);
+            const y = 1.05 * Math.sin(2 * a) + 0.09 * Math.sin(a * 12);
+            const z = 0.42 * Math.cos(3 * a) + 0.09 * Math.cos(a * 6);
+            return optionalTarget.set(x, y, z);
+          }
+        }
+        const strandGeo = new THREE.TubeGeometry(new CompanionStrandCurve(), 200, 0.042, 12, true);
+        const strandMat = new THREE.MeshStandardMaterial({
+          color: 0xf4ece1,
+          roughness: 0.45,
+          metalness: 0.35
+        });
+        rootGroup.add(new THREE.Mesh(strandGeo, strandMat));
+
+        function createCoffeeBeanGeometry() {
+          const geo = new THREE.SphereGeometry(0.24, 24, 20);
+          const pos = geo.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            let x = pos.getX(i);
+            let y = pos.getY(i) * 1.38;
+            let z = pos.getZ(i) * 0.78;
+            if (z > 0) {
+              const cleft = Math.exp(-Math.pow(x / 0.045, 2)) * 0.095 * (1 - 0.35 * Math.pow(y / 0.34, 2));
+              z -= Math.max(0, cleft);
+            }
+            pos.setXYZ(i, x, y, z);
+          }
+          geo.computeVertexNormals();
+          return geo;
+        }
+
+        const beanGeo = createCoffeeBeanGeometry();
+        const beanMat = new THREE.MeshStandardMaterial({
+          color: 0x3b2313,
+          roughness: 0.38,
+          metalness: 0.18
+        });
+
+        const beansGroup = new THREE.Group();
+        rootGroup.add(beansGroup);
+
+        const beans = [];
+        const beanCount = 14;
+        for (let i = 0; i < beanCount; i++) {
+          const b = new THREE.Mesh(beanGeo, beanMat);
+          const angle = (i / beanCount) * Math.PI * 2;
+          const radius = 2.35 + (i % 3) * 0.28;
+          b.userData = {
+            angle: angle,
+            radius: radius,
+            speed: 0.004 + (i % 4) * 0.001,
+            yOffset: (Math.random() - 0.5) * 1.6,
+            rotSpeedX: (Math.random() - 0.5) * 0.02,
+            rotSpeedY: (Math.random() - 0.5) * 0.02
+          };
+          b.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+          beansGroup.add(b);
+          beans.push(b);
+        }
+
+        const stepConfigs = [
+          { rotX: 0.12, rotY: -0.22, scale: 1.0, lightColor: 0xffcf91, knotColor: 0xc88434 },
+          { rotX: 0.42, rotY: 0.55,  scale: 1.06, lightColor: 0xff9d42, knotColor: 0xd97b29 },
+          { rotX: -0.24, rotY: 1.15, scale: 1.02, lightColor: 0xf4ece1, knotColor: 0xe3a354 }
+        ];
+        let targetRotX = stepConfigs[0].rotX;
+        let targetRotY = stepConfigs[0].rotY;
+        let targetScale = 1.0;
+
+        const stepBtns = document.querySelectorAll('.pausa-step');
+        stepBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            stepBtns.forEach(function (b) {
+              b.classList.remove('is-active');
+              b.setAttribute('aria-selected', 'false');
+            });
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-selected', 'true');
+            const idx = parseInt(btn.getAttribute('data-step'), 10) || 0;
+            const cfg = stepConfigs[idx];
+            targetRotX = cfg.rotX;
+            targetRotY = cfg.rotY;
+            targetScale = cfg.scale;
+            keyLight.color.setHex(cfg.lightColor);
+            knotMat.color.setHex(cfg.knotColor);
+          });
+        });
+
+        let isDragging = false;
+        let prevX = 0;
+        let prevY = 0;
+
+        knotCanvas.addEventListener('pointerdown', function (e) {
+          isDragging = true;
+          prevX = e.clientX;
+          prevY = e.clientY;
+        });
+
+        window.addEventListener('pointerup', function () {
+          isDragging = false;
+        });
+
+        window.addEventListener('pointermove', function (e) {
+          if (!isDragging) return;
+          const dx = e.clientX - prevX;
+          const dy = e.clientY - prevY;
+          prevX = e.clientX;
+          prevY = e.clientY;
+          targetRotY += dx * 0.008;
+          targetRotX += dy * 0.008;
+        }, { passive: true });
+
+        let clock = 0;
+        function animateKnot() {
+          requestAnimationFrame(animateKnot);
+          clock += 0.012;
+
+          if (!isDragging) {
+            targetRotY += 0.0032;
+          }
+
+          rootGroup.rotation.x += (targetRotX + Math.sin(clock * 0.7) * 0.06 - rootGroup.rotation.x) * 0.06;
+          rootGroup.rotation.y += (targetRotY - rootGroup.rotation.y) * 0.06;
+          const s = rootGroup.scale.x + (targetScale - rootGroup.scale.x) * 0.06;
+          rootGroup.scale.set(s, s, s);
+
+          for (let i = 0; i < beans.length; i++) {
+            const b = beans[i];
+            const ud = b.userData;
+            ud.angle += ud.speed;
+            b.position.x = Math.cos(ud.angle) * ud.radius;
+            b.position.z = Math.sin(ud.angle) * (ud.radius * 0.55);
+            b.position.y = ud.yOffset + Math.sin(clock + i) * 0.18;
+            b.rotation.x += ud.rotSpeedX;
+            b.rotation.y += ud.rotSpeedY;
+          }
+
+          renderer.render(scene, camera);
+        }
+        animateKnot();
+      }
+
+      if (document.readyState === 'complete') {
+        initThreeVisuals();
+      } else {
+        window.addEventListener('load', initThreeVisuals);
+      }
+    })();
+  </script>
+</body>
+</html>

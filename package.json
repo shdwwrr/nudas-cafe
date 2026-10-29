@@ -1,0 +1,19 @@
+{
+  "name": "nudas-cafe",
+  "version": "1.0.0",
+  "description": "NUDAS Cafeteria Online - Cafe de Especialidad & SipO's Drip Bags",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "nudas",
+    "cafe-especialidad",
+    "chile",
+    "threejs",
+    "ecommerce"
+  ],
+  "author": "NUDAS (@nudas_co)",
+  "license": "MIT"
+}
